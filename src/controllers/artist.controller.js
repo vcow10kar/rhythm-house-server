@@ -16,6 +16,9 @@ router.post('/register',
     body('name')
     .notEmpty()
     .withMessage("Artist's name is required!"),
+    body('username')
+    .notEmpty()
+    .withMessage("Artist's Username is required!"),
     body('email')
     .notEmpty()
     .withMessage("Artist's email is required!")
@@ -59,6 +62,7 @@ router.post('/register',
             return res.status(201).send({token});
 
         } catch(err) {
+            console.log("Error:", err);
             return res.status(400).send({error: "Something went wrong!"});
         }
     }
@@ -83,8 +87,7 @@ router.post('/login', async(req, res) => {
         return res.status(200).send({token});
 
     } catch(err) {
-        console.log(err);
-
+        console.log("Error:", err);
         return res.status(400).send({error: 'Something went wrong!'});
     }
 })
