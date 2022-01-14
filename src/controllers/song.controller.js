@@ -17,6 +17,23 @@ router.get('/', async(req, res) => {
     }
 })
 
+router.get('/album/:id', async(req, res) => {
+    try {
+
+        const songs = await Song.find({album: req.params.id})
+        .populate('album')
+        .populate('artist', 'name')
+        .lean().exec();
+
+        return res.status(200).send({songs: songs});
+
+    } catch(err) {
+        console.log('Error:', err);
+
+        return res.status(400).send({error: "Something went wrong!"});
+    }
+})
+
 router.post('/', authenticate, async(req, res) => {
     try {
 
