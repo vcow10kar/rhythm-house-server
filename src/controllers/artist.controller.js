@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
+const authenticate = require('../middlewares/authenticate');
 require('dotenv').config();
 
 const newToken = (artist) => {
@@ -91,6 +92,20 @@ router.post('/login', async(req, res) => {
         return res.status(400).send({error: 'Something went wrong!'});
     }
 })
+
+router.get('/getArtist', authenticate, async(req, res) => {
+    try {
+        const payload = {
+            name: req.artist.artist.name,
+            username: req.artist.artist.username,
+            email: req.artist.artist.email
+        }
+        return res.status(200).send({artist: payload});
+    } catch(err) {
+        console.log('Error:', err);
+        return res.status(400).send({error: 'Something went wrong!'});
+    }
+});
 
 
 

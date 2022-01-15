@@ -42,6 +42,8 @@ router.post('/', authenticate, async(req, res) => {
             artist: req.artist.artist._id
         }
 
+        // console.log('Payload', payload);
+
         const song = await Song.create(payload);
 
         return res.status(200).send({song: song});
