@@ -98,7 +98,8 @@ router.get('/getArtist', authenticate, async(req, res) => {
         const payload = {
             name: req.artist.artist.name,
             username: req.artist.artist.username,
-            email: req.artist.artist.email
+            email: req.artist.artist.email,
+            id: req.artist.artist._id
         }
         return res.status(200).send({artist: payload});
     } catch(err) {

@@ -15,6 +15,18 @@ router.get('/', async (req, res) => {
     }
 })
 
+
+router.get('/:id', async (req, res) => {
+    try {
+        const albums = await Album.find({artist: req.params.id}).populate('artist', "name").lean().exec();
+
+        return res.status(200).send({ albums: albums });
+    } catch (err) {
+        console.log("Error:", err);
+        return res.status(400).send({ error: "Something went wrong!" });
+    }
+})
+
 router.get('/search', async (req, res) => {
     try {
         const albums = await Album.find({ name: { $regex: req.query.search, $options: 'i' } }).lean().exec();
