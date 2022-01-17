@@ -48,7 +48,7 @@ router.post('/', authenticate, async (req, res) => {
 
         console.log('Payload', payload);
 
-        const album = await Album.create(payload);
+        const album = await Album.create(payload).populate('artist', 'name');
 
         return res.status(200).send({ album: album });
     } catch (err) {

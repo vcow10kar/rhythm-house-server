@@ -85,7 +85,15 @@ router.post('/login', async(req, res) => {
 
         const token = newToken(artist);
 
-        return res.status(200).send({token});
+        const data = {
+            token: token,
+            artist: {
+                name: artist.name,
+                id: artist._id
+            }
+        }
+
+        return res.status(200).send({data});
 
     } catch(err) {
         console.log("Error:", err);
