@@ -59,7 +59,7 @@ router.get('/', async (req, res) => {
         } 
 
     } catch (err) {
-        console.log("Error:", err);
+        console.log("Error in Getting Albums:", err);
         return res.status(400).send({ error: "Something went wrong!" });
     }
 })
@@ -71,19 +71,24 @@ router.get('/:id', async (req, res) => {
 
         return res.status(200).send({ albums: albums });
     } catch (err) {
-        console.log("Error:", err);
+        console.log("Error in Getting by Artist Id:", err);
         return res.status(400).send({ error: "Something went wrong!" });
     }
 })
 
-router.get('/search', async (req, res) => {
+router.get('/:search/search', async (req, res) => {
     try {
-        const albums = await Album.find({ name: { $regex: req.query.search, $options: 'i' } }).lean().exec();
+        console.log("Request:", req.query);
+        const size = 8;
 
-        return res.status(200).send({ albums: albums });
+        const albums = await Album.find({ name: { $regex: req.query.s, $options: 'i' } }).populate('artist', 'name').lean().exec();
+
+        const pages = Math.ceil(albums.length / size);
+
+        return res.status(200).send({ albums: albums, pages: pages });
 
     } catch (err) {
-        console.log('Error:', err);
+        console.log('Error in Searching:', err);
         return res.status(400).send({ error: "Something went wrong!" });
     }
 })
