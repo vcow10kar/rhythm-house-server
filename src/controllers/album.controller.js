@@ -28,6 +28,8 @@ router.get('/', async (req, res) => {
 
         queryGenres = queryGenres || [...genres];
         if (req.query.sort && queryGenres) {
+            const count = await Album.find({genre: {$in: [...queryGenres]}}).countDocuments();
+
             const albums = await Album.find({genre: {$in: [...queryGenres]}}).populate('artist', "name").sort({ year: req.query.sort }).skip(offset).limit(size).lean().exec();
 
             let pages;
@@ -35,24 +37,27 @@ router.get('/', async (req, res) => {
             if(queryGenres.length === genres.size) {
                 pages = Math.ceil(albumsCount / size);
             } else {
-                pages = Math.ceil(albums.length / size);
+                pages = Math.ceil(count / size);
             }
 
             //console.log('Pages 2', pages);
 
             return res.status(200).send({ albums: albums, albumsCount: albumsCount, pages: pages,  genres: [...genres] });
         } else if(queryGenres.length === genres.size) {
+            const count = await Album.find({genre: {$in: [...queryGenres]}}).countDocuments();
 
             const albums = await Album.find({}).populate('artist', "name").skip(offset).limit(size).lean().exec();
 
-            const pages = Math.ceil(albumsCount / size);
+            const pages = Math.ceil(count / size);
 
             //console.log('Pages', pages, albumsCount, size);
             return res.status(200).send({ albums: albums, albumsCount: albumsCount, pages: pages, genres: [...genres] });
         } else if (queryGenres){
+            const count = await Album.find({genre: {$in: [...queryGenres]}}).countDocuments();
+
             const albums = await Album.find({genre: {$in: [...queryGenres]}}).populate('artist', "name").skip(offset).limit(size).lean().exec();
 
-            const pages = Math.ceil(albums.length / size);
+            const pages = Math.ceil(count / size);
 
             //console.log('Pages 1', pages);
             return res.status(200).send({ albums: albums, albumsCount: albumsCount, pages: pages, genres: [...genres] });
