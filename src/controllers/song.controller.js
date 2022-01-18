@@ -54,4 +54,33 @@ router.post('/', authenticate, async(req, res) => {
     }
 })
 
+router.patch('/:id', authenticate, async(req, res) => {
+    try {
+
+        const song = await Song.findByIdAndUpdate(req.params.id, req.body, {
+            new: true
+        });
+
+        return res.status(200).send({song: song});
+
+    } catch(err) {
+        console.log('Error:', err);
+
+        return res.status(400).send({error: 'Something went wrong!'});
+    }
+})
+
+router.delete('/:id', authenticate, async(req, res) => {
+    try {
+        const song = await Song.findByIdAndDelete(req.params.id);
+
+        return res.status(200).send({song});
+
+    }catch(err) {
+        console.log('Error:', err);
+
+        return res.status(400).send({error: 'Something went wrong!'});
+    }
+})
+
 module.exports = router;

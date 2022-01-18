@@ -5,40 +5,40 @@ const authenticate = require('../middlewares/authenticate');
 require('dotenv').config();
 
 const newToken = (artist) => {
-    return jwt.sign({artist}, process.env.JWT_SECRET_KEY);
+    return jwt.sign({ artist }, process.env.JWT_SECRET_KEY);
 }
 
-const {body, validationResult} = require('express-validator');
+const { body, validationResult } = require('express-validator');
 
 const Artist = require('../models/artist.model');
 
 // create or register an artist
 router.post('/register',
     body('name')
-    .notEmpty()
-    .withMessage("Artist's name is required!"),
+        .notEmpty()
+        .withMessage("Artist's name is required!"),
     body('username')
-    .notEmpty()
-    .withMessage("Artist's Username is required!"),
+        .notEmpty()
+        .withMessage("Artist's Username is required!"),
     body('email')
-    .notEmpty()
-    .withMessage("Artist's email is required!")
-    .isEmail()
-    .withMessage('Enter a valid email!'),
+        .notEmpty()
+        .withMessage("Artist's email is required!")
+        .isEmail()
+        .withMessage('Enter a valid email!'),
     body('password')
-    .notEmpty()
-    .withMessage('Password is required!')
-    .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[a-zA-Z\d@$.!%*#?&]/)
-    .withMessage('Invalid Password Format!')
-    .isLength({min: 8})
-    .withMessage('Password should be 8-20 characters long!'),
+        .notEmpty()
+        .withMessage('Password is required!')
+        .matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[a-zA-Z\d@$.!%*#?&]/)
+        .withMessage('Invalid Password Format!')
+        .isLength({ min: 8 })
+        .withMessage('Password should be 8-20 characters long!'),
 
-    async(req, res) => {
+    async (req, res) => {
         const errors = validationResult(req);
 
-        let  finalErrors = null;
+        let finalErrors = null;
 
-        if(!errors.isEmpty()) {
+        if (!errors.isEmpty()) {
             finalErrors = errors.array().map((error) => {
                 return {
                     param: error.param,
@@ -46,41 +46,41 @@ router.post('/register',
                 };
             });
 
-            return res.status(400).send({error:finalErrors});
+            return res.status(400).send({ error: finalErrors });
         }
 
         try {
-            const artistEmailCheck = await Artist.findOne({$or: [{email: req.body.email}, {username: req.body.username}]}).lean().exec();
+            const artistEmailCheck = await Artist.findOne({ $or: [{ email: req.body.email }, { username: req.body.username }] }).lean().exec();
 
-            if(artistEmailCheck) {
-                return res.status(400).send({error: "Artist with this Email or Username already exists!"});
+            if (artistEmailCheck) {
+                return res.status(400).send({ error: "Artist with this Email or Username already exists!" });
             }
 
             const artist = await Artist.create(req.body);
 
             const token = newToken(artist);
 
-            return res.status(201).send({token});
+            return res.status(201).send({ token });
 
-        } catch(err) {
+        } catch (err) {
             console.log("Error:", err);
-            return res.status(400).send({error: "Something went wrong!"});
+            return res.status(400).send({ error: "Something went wrong!" });
         }
     }
 )
 
-router.post('/login', async(req, res) => {
+router.post('/login', async (req, res) => {
     try {
-        const artist = await Artist.findOne({$or : [{email: {$eq: req.body.email}}, {username: {$eq: req.body.username}}]});
+        const artist = await Artist.findOne({ $or: [{ email: { $eq: req.body.email } }, { username: { $eq: req.body.username } }] });
 
-        if(!artist) {
-            return res.status(400).send({error: 'Please check your Email Id or Username and password!'});
+        if (!artist) {
+            return res.status(400).send({ error: 'Please check your Email Id or Username and password!' });
         }
 
         let match = artist.checkPassword(req.body.password);
 
-        if(!match) {
-            return res.status(400).send({error: 'Please check your Email Id or Username and password!'});
+        if (!match) {
+            return res.status(400).send({ error: 'Please check your Email Id or Username and password!' });
         }
 
         const token = newToken(artist);
@@ -89,33 +89,63 @@ router.post('/login', async(req, res) => {
             token: token,
             artist: {
                 name: artist.name,
-                id: artist._id
+                username: artist.username,
+                email: artist.email,
+                id: artist._id,
+                bio: artist.bio,
+                imageURL: artist.imageURL
             }
         }
 
-        return res.status(200).send({data});
+        return res.status(200).send({ data });
 
-    } catch(err) {
+    } catch (err) {
         console.log("Error:", err);
-        return res.status(400).send({error: 'Something went wrong!'});
+        return res.status(400).send({ error: 'Something went wrong!' });
     }
 })
 
-router.get('/getArtist', authenticate, async(req, res) => {
+router.get('/getArtist', authenticate, async (req, res) => {
     try {
         const payload = {
             name: req.artist.artist.name,
             username: req.artist.artist.username,
             email: req.artist.artist.email,
-            id: req.artist.artist._id
+            id: req.artist.artist._id,
+            bio: req.artist.artist.bio,
+            imageURL: req.artist.artist.imageURL
         }
-        return res.status(200).send({artist: payload});
-    } catch(err) {
+        return res.status(200).send({ artist: payload });
+    } catch (err) {
         console.log('Error:', err);
-        return res.status(400).send({error: 'Something went wrong!'});
+        return res.status(400).send({ error: 'Something went wrong!' });
     }
 });
 
+router.patch('/:id', authenticate, async (req, res) => {
+    try {
+
+        const artist = await Artist.findByIdAndUpdate(req.params.id, req.body, {
+            new: true
+        });
+
+        const payload = {
+            name: artist.name,
+            username: artist.username,
+            email: artist.email,
+            id: artist._id,
+            bio: artist.bio,
+            imageURL: artist.imageURL
+        }
+
+        return res.status(200).send({ artist: payload });
+
+    } catch (err) {
+        console.log('Error:', err);
+
+        return res.status(400).send({ error: 'Something went wrong!' });
+    }
+})
 
 
 module.exports = router;

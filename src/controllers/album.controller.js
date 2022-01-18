@@ -106,4 +106,33 @@ router.post('/', authenticate, async (req, res) => {
     }
 })
 
+router.patch('/:id', authenticate, async(req, res) => {
+    try {
+
+        const album = await Album.findByIdAndUpdate(req.params.id, req.body, {
+            new: true
+        });
+
+        return res.status(200).send({album: album});
+
+    } catch(err) {
+        console.log('Error:', err);
+
+        return res.status(400).send({error: 'Something went wrong!'});
+    }
+})
+
+router.delete('/:id', authenticate, async(req, res) => {
+    try {
+        const album = await Album.findByIdAndDelete(req.params.id);
+
+        return res.status(200).send({album});
+
+    }catch(err) {
+        console.log('Error:', err);
+
+        return res.status(400).send({error: 'Something went wrong!'});
+    }
+})
+
 module.exports = router;
