@@ -78,7 +78,7 @@ router.get('/:id', async (req, res) => {
 
 router.get('/:search/search', async (req, res) => {
     try {
-        console.log("Request:", req.query);
+        //console.log("Request:", req.query);
         const size = 8;
 
         const albums = await Album.find({ name: { $regex: req.query.s, $options: 'i' } }).populate('artist', 'name').lean().exec();
@@ -100,9 +100,7 @@ router.post('/', authenticate, async (req, res) => {
             artist: req.artist.artist._id
         }
 
-        console.log('Payload', payload);
-
-        const album = await Album.create(payload).populate('artist', 'name');
+        const album = await Album.create(payload);
 
         return res.status(200).send({ album: album });
     } catch (err) {
