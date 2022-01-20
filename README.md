@@ -18,6 +18,11 @@
 - Artist can add songs to their album
 - Artist can update the details of a song in an album
 
+## Tech Stack
+- Frontend - ReactJS, Redux, Material UI
+- Backend - ExpressJS, MongooseJS, NodeJS
+- Database - MongoDb
+
 ## Pages:
 
 ### Landing Page
